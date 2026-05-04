@@ -34,7 +34,9 @@ return [
 
         'sqlite' => [
             'driver' => 'sqlite',
-            'url' => env('DB_URL', env('DATABASE_URL')),
+            // Never fall back to DATABASE_URL here: on Railway it is Postgres/MySQL and
+            // would be merged into this connection while DB_CONNECTION still defaults to sqlite.
+            'url' => env('DB_URL'),
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
