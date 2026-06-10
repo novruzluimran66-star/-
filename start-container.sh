@@ -3,11 +3,18 @@
 # Clear config before migrate so runtime MYSQL_URL / DATABASE_URL from Railway apply.
 set -e
 
+# Strip accidental CR/LF from pasted Railway variables (e.g. DB_CONNECTION=mysql\n).
+trim_var() {
+  printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+DB_CONNECTION="$(trim_var "${DB_CONNECTION:-}")"
+export DB_CONNECTION
+
 if [ "$IS_LARAVEL" = "true" ]; then
   php artisan config:clear 2>/dev/null || true
 
   # Railway: MySQL vars exist on the DB service until you "Connect" / add References to THIS service.
-  if [ "${DB_CONNECTION:-}" = "mysql" ] || [ "${DB_CONNECTION:-}" = "mariadb" ]; then
+  if [ "$DB_CONNECTION" = "mysql" ] || [ "$DB_CONNECTION" = "mariadb" ]; then
     if [ -z "${MYSQLHOST:-}" ] && [ -z "${MYSQL_HOST:-}" ] && [ -z "${MYSQL_URL:-}" ] && [ -z "${DATABASE_URL:-}" ] && [ -z "${DB_HOST:-}" ]; then
       echo ""
       echo "=== ОШИБКА КОНФИГУРАЦИИ RAILWAY / RAILWAY CONFIG ERROR ==="

@@ -3,6 +3,11 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// Railway/UI sometimes paste values with trailing newline → connection name "mysql\n" breaks Laravel.
+$envTrim = static fn (string $key, mixed $default = null): mixed => ($v = env($key, $default)) === null
+    ? $default
+    : (is_string($v) ? trim($v) : $v);
+
 return [
 
     /*
@@ -17,7 +22,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => $envTrim('DB_CONNECTION', 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
